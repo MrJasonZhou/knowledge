@@ -1,0 +1,11 @@
+{
+  "api_endpoint": "https://your-server.com/api/collect",
+  "api_key": "your-api-key",
+  "default_source": "wechat",
+  "show_tag_prompt": true,
+  "notification_on_success": true,
+  "default_tags": [],
+  "timeout_seconds": 30,
+  "retry_on_failure": false,
+  "max_retries": 3
+}

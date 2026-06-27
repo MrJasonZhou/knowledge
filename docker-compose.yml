@@ -1,0 +1,90 @@
+# ============================================================
+# Docker Compose 構成ファイル
+# サービス:
+#   1. knowledge-collector - Node.js API サーバー
+#   2. siyuan - 思源ノートアプリケーション
+# ============================================================
+
+
+services:
+  # ──────────────────────────────────────────────
+  # Knowledge Collector - Node.js API サーバー
+  # 微信記事の収集・処理を担当
+  # ──────────────────────────────────────────────
+  knowledge-collector:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: knowledge-collector
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      # Gemini API キー（記事の要約・分析に使用）
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-your-gemini-api-key}
+      # 思源ノート API 接続設定
+      - SIYUAN_API_URL=http://siyuan:6806
+      - SIYUAN_API_TOKEN=${SIYUAN_API_TOKEN:-your-siyuan-token}
+      # アプリケーション設定
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # データ永続化用ボリューム
+      - collector-data:/app/data
+      # ログファイルの永続化
+      - collector-logs:/app/logs
+    depends_on:
+      siyuan:
+        condition: service_started
+    networks:
+      - weixin-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ──────────────────────────────────────────────
+  # SiYuan - 思源ノートアプリケーション
+  # ナレッジベースとして記事を保存・管理
+  # ──────────────────────────────────────────────
+  siyuan:
+    image: b3log/siyuan:latest
+    container_name: siyuan
+    restart: unless-stopped
+    ports:
+      - "6806:6806"
+    volumes:
+      # ワークスペースデータの永続化
+      - siyuan-data:/siyuan/workspace
+    # アクセス認証コードを設定して起動
+    # ※ user指定はSiYuanの公式イメージ内でユーザー作成と競合するため不要
+    command: >
+      --workspace=/siyuan/workspace
+      --accessAuthCode=${SIYUAN_ACCESS_AUTH_CODE:-your-auth-code}
+    networks:
+      - weixin-network
+
+# ──────────────────────────────────────────────
+# ネットワーク定義
+# ──────────────────────────────────────────────
+networks:
+  weixin-network:
+    driver: bridge
+    name: weixin-network
+
+# ──────────────────────────────────────────────
+# ボリューム定義
+# ──────────────────────────────────────────────
+volumes:
+  # API サーバーのデータ永続化
+  collector-data:
+    driver: local
+  # API サーバーのログ永続化
+  collector-logs:
+    driver: local
+  # 思源ノートのワークスペースデータ
+  siyuan-data:
+    driver: local
+

@@ -1,0 +1,8 @@
+# 知識ベース管理システム
+node_modules/
+.env
+*.log
+siyuan-data/
+data/
+dist/
+.DS_Store

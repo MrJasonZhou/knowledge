@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Collector - 設定</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /**
+     * オプションページのスタイル
+     * ポップアップと統一感のあるダークデザイン
+     */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f1a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 背景のアンビエントグロー */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .options-container {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      z-index: 1;
+    }
+
+    /* ヘッダー */
+    .options-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .options-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+      border: 1px solid rgba(129, 140, 248, 0.2);
+      margin-bottom: 16px;
+    }
+
+    .options-logo svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .options-title {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .options-subtitle {
+      font-size: 14px;
+      color: rgba(148, 163, 184, 0.6);
+    }
+
+    /* 設定カード */
+    .settings-card {
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .settings-card h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-card h2 svg {
+      color: #818cf8;
+      opacity: 0.8;
+    }
+
+    /* フォームグループ */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(148, 163, 184, 0.6);
+      margin-bottom: 8px;
+    }
+
+    .form-description {
+      font-size: 12px;
+      color: rgba(148, 163, 184, 0.4);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      border-color: rgba(129, 140, 248, 0.4);
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.08);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .form-input::placeholder {
+      color: rgba(148, 163, 184, 0.3);
+    }
+
+    /* 保存ボタン */
+    .save-settings-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .save-settings-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .save-settings-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .save-settings-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .save-settings-btn:active {
+      transform: translateY(0);
+    }
+
+    .save-settings-btn.saved {
+      background: linear-gradient(135deg, #059669, #10b981);
+    }
+
+    /* ステータスメッセージ */
+    .settings-status {
+      text-align: center;
+      font-size: 13px;
+      color: #6ee7b7;
+      margin-top: 14px;
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .settings-status.visible {
+      opacity: 1;
+    }
+
+    /* リセットリンク */
+    .reset-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: rgba(148, 163, 184, 0.4);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .reset-link:hover {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="options-container">
+    <!-- ヘッダー -->
+    <div class="options-header">
+      <div class="options-logo">
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2z" fill="url(#g1)" opacity="0.15"/>
+          <path d="M9 8h10c0.552 0 1 0.448 1 1v10c0 0.552-0.448 1-1 1H9c-0.552 0-1-0.448-1-1V9c0-0.552 0.448-1 1-1z" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
+          <path d="M11 12h6M11 14.5h6M11 17h4" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M12 8V6.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V8" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
+          <defs>
+            <linearGradient id="g1" x1="2" y1="2" x2="26" y2="26">
+              <stop offset="0%" stop-color="#818cf8"/>
+              <stop offset="50%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="options-title">Knowledge Collector</h1>
+      <p class="options-subtitle">拡張機能の設定</p>
+    </div>
+
+    <!-- API設定カード -->
+    <div class="settings-card">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        API接続設定
+      </h2>
+
+      <div class="form-group">
+        <label class="form-label" for="api-endpoint">APIエンドポイントURL</label>
+        <p class="form-description">
+          ナレッジベースのAPIエンドポイントを指定してください。
+        </p>
+        <input
+          type="url"
+          id="api-endpoint"
+          class="form-input"
+          placeholder="http://localhost:3000/api/collect"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="api-key">APIキー / トークン</label>
+        <p class="form-description">
+          認証が必要な場合はAPIキーまたはBearerトークンを入力してください。
+        </p>
+        <input
+          type="password"
+          id="api-key"
+          class="form-input"
+          placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+          spellcheck="false"
+        >
+      </div>
+    </div>
+
+    <!-- 保存ボタン -->
+    <button class="save-settings-btn" id="save-settings">設定を保存</button>
+    <div class="settings-status" id="settings-status"></div>
+
+    <!-- リセットリンク -->
+    <a class="reset-link" id="reset-settings">デフォルト設定にリセット</a>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

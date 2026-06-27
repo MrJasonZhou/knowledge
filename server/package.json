@@ -1,0 +1,23 @@
+{
+  "name": "knowledge-collector",
+  "version": "1.0.0",
+  "description": "知識ベース収集サーバー - 記事の抽出、AI整理、思源ノートへの自動アーカイブ",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node test/test-collect.js"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsdom": "^25.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
