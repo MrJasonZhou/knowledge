@@ -4,10 +4,16 @@
  */
 
 import { Router } from 'express';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { extractArticle } from '../services/extractor.js';
 import { analyzeArticle } from '../services/hermes.js';
 import { createArticleDoc, checkConnection } from '../services/siyuan.js';
 import { config } from '../config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = Router();
 
@@ -205,153 +211,22 @@ router.get('/status', async (req, res) => {
 
 // ===== iOS快捷指令分发服务 =====
 
-const SHORTCUT_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>WFWorkflowClientVersion</key>
-	<string>2600</string>
-	<key>WFWorkflowClientRelease</key>
-	<string>3.0</string>
-	<key>WFWorkflowIcon</key>
-	<dict>
-		<key>WFWorkflowIconStartColor</key>
-		<integer>4282601727</integer>
-		<key>WFWorkflowIconGlyphNumber</key>
-		<integer>59799</integer>
-	</dict>
-	<key>WFWorkflowInputContentItemClasses</key>
-	<array>
-		<string>WFURLContentItem</string>
-		<string>WFStringContentItem</string>
-		<string>WFSafariWebPageContentItem</string>
-		<string>WFArticleContentItem</string>
-	</array>
-	<key>WFWorkflowActions</key>
-	<array>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.geturls</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>ExtensionInput</string>
-					</dict>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.ask</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>UUID</key>
-				<string>B80D8DE6-54A6-4FA2-8356-621B43AF013E</string>
-				<key>WFAskActionPrompt</key>
-				<string>请输入标签（以英文逗号分隔）</string>
-				<key>WFInputType</key>
-				<string>Text</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.downloadurl</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFURL</key>
-				<string>https://knowledge.jasonzhou.com/api/collect</string>
-				<key>WFHTTPMethod</key>
-				<string>POST</string>
-				<key>WFHTTPBodyType</key>
-				<string>JSON</string>
-				<key>WFJSONValues</key>
-				<array>
-					<dict>
-						<key>WFKey</key>
-						<string>url</string>
-						<key>WFValue</key>
-						<dict>
-							<key>Value</key>
-							<dict>
-								<key>Type</key>
-								<string>ExtensionInput</string>
-							</dict>
-							<key>WFSerializationType</key>
-							<string>WFTextTokenAttachmentParameterState</string>
-						</dict>
-					</dict>
-					<dict>
-						<key>WFKey</key>
-						<string>source</string>
-						<key>WFValue</key>
-						<dict>
-							<key>Value</key>
-							<string>wechat</string>
-							<key>WFSerializationType</key>
-							<string>WFTextTokenAttachmentParameterState</string>
-						</dict>
-					</dict>
-					<dict>
-						<key>WFKey</key>
-						<string>tags</string>
-						<key>WFValue</key>
-						<dict>
-							<key>Value</key>
-							<dict>
-								<key>Type</key>
-								<string>ActionOutput</string>
-								<key>OutputName</key>
-								<string>要求输入的结果</string>
-								<key>OutputUUID</key>
-								<string>B80D8DE6-54A6-4FA2-8356-621B43AF013E</string>
-							</dict>
-							<key>WFSerializationType</key>
-							<string>WFTextTokenAttachmentParameterState</string>
-						</dict>
-					</dict>
-				</array>
-				<key>WFHTTPHeaders</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Content-Type</key>
-						<string>application/json</string>
-					</dict>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.shownotification</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFNotificationActionTitle</key>
-				<string>知识库收录</string>
-				<key>WFNotificationActionBody</key>
-				<string>✅ 文章已成功保存到思源笔记！</string>
-			</dict>
-		</dict>
-	</array>
-	<key>WFWorkflowTypes</key>
-	<array>
-		<string>NCWidget</string>
-		<string>ActionExtension</string>
-	</array>
-</dict>
-</plist>`;
 
 /**
  * GET /api/shortcut/file
  * .shortcut 文件直接作为二进制数据下载（避免被 iOS 识别为描述文件）
  */
 router.get('/shortcut/file', (req, res) => {
-  res.setHeader('Content-Type', 'application/octet-stream');
-  res.setHeader('Content-Disposition', 'attachment; filename="knowledge_collect.shortcut"');
-  res.send(Buffer.from(SHORTCUT_PLIST, 'utf8'));
+  try {
+    const filePath = join(__dirname, '../resources/knowledge_collect_signed.shortcut');
+    const fileBuffer = fs.readFileSync(filePath);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename="knowledge_collect.shortcut"');
+    res.send(fileBuffer);
+  } catch (err) {
+    console.error('Failed to read signed shortcut:', err);
+    res.status(500).send('Error serving shortcut file');
+  }
 });
 
 /**
