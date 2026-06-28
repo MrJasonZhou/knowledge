@@ -346,10 +346,10 @@ const SHORTCUT_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
 
 /**
  * GET /api/shortcut/file
- * .shortcut ファイルを直接バイナリとして配信する（iPhoneが認識できるように）
+ * .shortcut 文件直接作为二进制数据下载（避免被 iOS 识别为描述文件）
  */
 router.get('/shortcut/file', (req, res) => {
-  res.setHeader('Content-Type', 'application/x-apple-aspen-config');
+  res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-Disposition', 'attachment; filename="knowledge_collect.shortcut"');
   res.send(Buffer.from(SHORTCUT_PLIST, 'utf8'));
 });
