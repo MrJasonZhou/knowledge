@@ -1,5 +1,5 @@
 # ビルドステージ - 依存関係のインストール
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci --production
 
 # 実行ステージ
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
